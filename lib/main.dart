@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'shell/app.dart';
 
 void main() {
   runApp(const ARPhotoApp());
@@ -15,24 +16,8 @@ class ARPhotoApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('AR Photo')),
-      body: Center(
-        child: Text(
-          '🚧 MVP coming soon...',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-      ),
+      home: const ARPhotoShell(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

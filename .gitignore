@@ -30,6 +30,10 @@ ios/Flutter/Flutter.framework
 ios/Flutter/Flutter.podspec
 ios/Podfile.lock
 
+# H5 UI
+h5_ui/node_modules/
+h5_ui/dist/
+
 # Misc
 *.log
 .env
