@@ -1,17 +1,15 @@
 /// AR 预览页面 — 展示 AR 效果控制
 
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ARAPI, bridge } from '../../bridge/bridge';
 
 const PreviewPage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const state = location.state as { contentId?: number; imagePath?: string } | null;
+  const { contentId } = useParams<{ contentId: string }>();
   const [arState, setArState] = useState<'playing' | 'paused'>('playing');
 
   useEffect(() => {
-    // 监听 AR 状态变更
     bridge.on('arStateChange', (data: unknown) => {
       const d = data as { state?: string };
       if (d?.state === 'paused' || d?.state === 'playing') {
@@ -19,9 +17,7 @@ const PreviewPage: React.FC = () => {
       }
     });
 
-    return () => {
-      ARAPI.stop();
-    };
+    return () => { ARAPI.stop(); };
   }, []);
 
   const togglePlay = () => {
@@ -47,9 +43,7 @@ const PreviewPage: React.FC = () => {
           <div className="ar-placeholder">
             <span className="ar-icon">✨</span>
             <span className="ar-text">AR 效果（原生层渲染）</span>
-            <span className="ar-id">
-              {state?.contentId ? `Content #${state.contentId}` : '新内容'}
-            </span>
+            <span className="ar-id">Content #{contentId}</span>
           </div>
         </div>
       </div>
@@ -125,16 +119,9 @@ const PreviewPage: React.FC = () => {
           gap: 8px;
           color: rgba(255,255,255,0.4);
         }
-        .ar-icon {
-          font-size: 48px;
-        }
-        .ar-text {
-          font-size: 14px;
-        }
-        .ar-id {
-          font-size: 12px;
-          color: rgba(255,255,255,0.2);
-        }
+        .ar-icon { font-size: 48px; }
+        .ar-text { font-size: 14px; }
+        .ar-id { font-size: 12px; color: rgba(255,255,255,0.2); }
         .preview-controls {
           display: flex;
           justify-content: center;
@@ -150,9 +137,7 @@ const PreviewPage: React.FC = () => {
           font-size: 14px;
           cursor: pointer;
         }
-        .ctrl-btn:active {
-          background: rgba(255,255,255,0.2);
-        }
+        .ctrl-btn:active { background: rgba(255,255,255,0.2); }
         .preview-emoji-tools {
           padding: 12px 16px 24px;
         }
@@ -178,9 +163,7 @@ const PreviewPage: React.FC = () => {
           align-items: center;
           justify-content: center;
         }
-        .emoji-btn:active {
-          background: rgba(255,255,255,0.15);
-        }
+        .emoji-btn:active { background: rgba(255,255,255,0.15); }
       `}</style>
     </div>
   );

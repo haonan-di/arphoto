@@ -42,7 +42,7 @@ const CameraPage: React.FC = () => {
         creatorId: 1,
         isPublic: true,
       });
-      navigate('/preview', { state: { contentId, imagePath: capturedPath } });
+      navigate(`/preview/${contentId}`);
     } catch (e) {
       console.error('Encode failed:', e);
     } finally {
@@ -53,7 +53,7 @@ const CameraPage: React.FC = () => {
   return (
     <div className="page">
       <div className="camera-header safe-top">
-        <button className="header-btn" onClick={() => navigate(-1)}>← 返回</button>
+        <button className="header-btn" onClick={() => navigate('/')}>← 首页</button>
         <span className="header-title">拍摄</span>
         <div style={{ width: 60 }} />
       </div>

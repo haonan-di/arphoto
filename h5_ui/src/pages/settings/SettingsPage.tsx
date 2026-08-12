@@ -1,4 +1,4 @@
-/// 设置页面
+/// 设置页面 — 个人中心子页
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +10,7 @@ const SettingsPage: React.FC = () => {
   return (
     <div className="page safe-top">
       <div className="settings-header">
-        <button className="header-btn" onClick={() => navigate(-1)}>← 返回</button>
+        <button className="header-btn" onClick={() => navigate('/profile')}>← 返回</button>
         <span className="header-title">设置</span>
         <div style={{ width: 60 }} />
       </div>

@@ -1,320 +1,36 @@
-# AR Photo — 开发环境搭建 & 运行指南
+# AR Photo — 项目交接文档
 
-> 适用环境：Windows PC + VS Code + Android/iOS 手机
+> 下次继续工作时，先读这个文件
 > 最后更新：2026-08-11
 
 ---
 
 ## 目录
 
-1. [环境准备](#1-环境准备)
-2. [H5 UI 层（浏览器即可跑）](#2-h5-ui-层浏览器即可跑)
-3. [Flutter 壳工程（Android 手机）](#3-flutter-壳工程android-手机)
-4. [iOS 支持方案](#4-ios-支持方案)
-5. [开发工作流](#5-开发工作流)
-6. [常见问题](#6-常见问题)
+1. [项目概况](#1-项目概况)
+2. [当前进度](#2-当前进度)
+3. [环境搭建](#3-环境搭建)
+4. [项目结构](#4-项目结构)
+5. [页面路由设计](#5-页面路由设计)
+6. [开发工作流](#6-开发工作流)
+7. [待办清单](#7-待办清单)
+8. [常见问题](#8-常见问题)
 
 ---
 
-## 1. 环境准备
+## 1. 项目概况
 
-### 1.1 安装 Flutter SDK
-
-```bash
-# 1. 下载 Flutter SDK
-#    去 https://docs.flutter.dev/get-started/install/windows
-#    下载 flutter_windows_x.x.x-stable.zip
-
-# 2. 解压到 D:\flutter（或你喜欢的路径）
-
-# 3. 配置环境变量
-#    系统变量 Path 里添加：D:\flutter\bin
-
-# 4. 验证安装
-flutter doctor
-```
-
-### 1.2 VS Code 插件
-
-| 插件 | 用途 |
-|---|---|
-| **Flutter** (Dart Code) | Dart/Flutter 语言支持、调试、热重载 |
-| **Error Lens** | 行内显示编译错误 |
-| **GitLens** | Git 历史可视化 |
-
-### 1.3 Android 手机准备
-
-```bash
-# 1. 手机开启 开发者模式
-#    设置 → 关于手机 → 连续点"版本号"7 次
-
-# 2. 开启 USB 调试
-#    设置 → 开发者选项 → USB 调试
-
-# 3. 连上 USB 验证
-flutter devices
-# 输出应显示你的 Android 设备
-
-# 4. 如果没识别到设备
-#    - 安装手机厂商 USB 驱动（https://developer.android.com/studio/run/oem-usb）
-#    - 或使用无线调试：
-#      adb pair <ip>:<port>   # 手机开发者选项里扫码配对
-#      adb connect <ip>:<port>
-```
-
-### 1.4 安装 Node.js
-
-H5 UI 层需要 Node.js 运行开发服务器：
-
-```bash
-# 去 https://nodejs.org 下载 LTS 版
-# 安装后验证
-node --version
-npm --version
-```
-
----
-
-## 2. H5 UI 层（浏览器即可跑）
-
-先跑 H5 层，不需要手机，PC 浏览器就能看到效果：
-
-```bash
-# 1. 进入 H5 目录
-cd d:\arphoto\h5_ui
-
-# 2. 安装依赖
-npm install
-
-# 3. 启动开发服务器
-npm run dev
-
-# 4. 浏览器打开 http://localhost:5173
-#    能看到 App 的 UI 页面（首页/拍摄/扫描/画廊/设置）
-```
-
-> 浏览器中运行时，所有 Bridge 调用（相机、水印、AR）走**模拟模式**，
-> 控制台会打印 `[Bridge] Mock call: ...` 日志。
-
-### 2.1 H5 页面清单
-
-| 路由 | 页面 | 说明 |
-|---|---|---|
-| `/` | 首页 | 英雄区 + 快捷入口 |
-| `/camera` | 拍摄 | 模拟相机预览 + 水印嵌入流程 |
-| `/scan` | 扫描 | 框选取景 + 解码流程 |
-| `/preview` | AR 预览 | 播放控制 + Emoji 装饰 |
-| `/gallery` | 画廊 | 内容管理 |
-| `/settings` | 设置 | 权限 / 存储 / 版本信息 |
-
----
-
-## 3. Flutter 壳工程（Android 手机）
-
-```bash
-# 1. 进入项目根目录
-cd d:\arphoto
-
-# 2. 获取 Flutter 依赖
-flutter pub get
-
-# 3. 连接 Android 手机（USB 或无线）
-#    确认设备已识别
-flutter devices
-
-# 4. 运行到手机
-flutter run
-```
-
-### 3.1 首次运行可能遇到的问题
+AR Photo — 手机 App，拍 Live Photo 嵌入暗水印打印，扫描复现 AR 动态效果。
 
 ```
-flutter pub get 慢
-  → 设置镜像源：
-    PUB_HOSTED_URL=https://pub.flutter-io.cn
-    FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn
-
-gradle 版本不兼容
-  → 打开 android/gradle-wrapper.properties 调整版本号
-
-WebView 加载 HTTP 地址白屏
-  → 开发时在 android/app/src/main/AndroidManifest.xml 中允许明文：
-    android:usesCleartextTraffic="true"
+拍 Live Photo → 嵌入暗水印 → 打印照片 → 手机一扫 → AR 复活 ✨
 ```
 
----
-
-## 4. iOS 支持方案
-
-**Windows 不能直接编译 iOS 应用。** 以下几种方案：
-
-### 方案 A：云构建（推荐）
-
-```yaml
-# 使用 Codemagic 或 GitHub Actions，每次 push 自动编译 IPA
-# 无需本地 Mac，免费版每月 500 分钟构建时间
-```
-
-### 方案 B：公司 Mac
-
-- 找台 Mac Mini / MacBook
-- 或在公司 IT 允许范围内使用云 Mac 服务（MacStadium / MacinCloud）
-
-### 方案 C：H5 调试 + 跳过 iOS 原生
-
-- H5 UI 层通过 Safari Web Inspector 调试
-- iOS 原生部分（CameraModule 等在 iOS 上）暂时跳过，后续用云构建验证
-
-> 开发阶段建议：**Android 真机调试为主，iOS 用云构建。**
-
----
-
-## 5. 开发工作流
-
-### 5.1 推荐 VS Code 布局
-
-```
-┌─────────────────────────────────────┐
-│  VS Code 分两个终端                   │
-├─────────────────────────────────────┤
-│  终端 1: H5 前端                      │
-│  cd d:\arphoto\h5_ui && npm run dev   │
-│  → 改 H5 代码即时热更新                │
-├─────────────────────────────────────┤
-│  终端 2: Flutter 壳                   │
-│  cd d:\arphoto && flutter run         │
-│  → 改 Dart 代码热重载 (r)             │
-└─────────────────────────────────────┘
-```
-
-### 5.2 三端调试策略
-
-| 场景 | 工具 | 方式 |
-|---|---|---|
-| H5 UI 样式/交互 | Chrome DevTools | 浏览器 http://localhost:5173 |
-| Bridge 通信 | 浏览器 Console | 看 `[Bridge] Mock call:` 日志 |
-| 原生模块 | Flutter DevTools | `flutter run` 后连接 DevTools |
-| 数据库 | SQLite 浏览器 | 导出 `ar_index.db` 查看 |
-| 真机相机/AR | Android 真机 | `flutter run` 直接跑 |
-
-### 5.3 Bridge 通信调试
-
-```typescript
-// H5 端：在浏览器控制台手动测试
-bridge.call('camera.startPreview', {})
-  .then(r => console.log('Result:', r))
-  .catch(e => console.error('Error:', e))
-
-// 原生端：在 Dart 代码中加 debugPrint
-debugPrint('[Bridge] Request: ${request.action}');
-```
-
-### 5.4 代码提交流程
-
-```bash
-# 1. 确认当前分支
-git branch
-
-# 2. 添加并提交
-git add .
-git commit -m "feat: 描述做了什么"
-
-# 3. 推送到远端
-git push
-```
-
----
-
-## 6. 常见问题
-
-### Q: `flutter doctor` 报错 `Android licenses not accepted`
-
-```bash
-flutter doctor --android-licenses
-# 一直按 y 接受
-```
-
-### Q: `flutter run` 报错 `Gradle build failed`
-
-```bash
-# 检查 Gradle 版本
-cat android/gradle/wrapper/gradle-wrapper.properties
-
-# 如果版本太旧，手动更新
-# 并检查 android/build.gradle 中的 AGP 版本
-```
-
-### Q: 手机连上但 `flutter devices` 看不到
-
-```bash
-# 1. 检查 USB 线是否支持数据传输（不是充电线）
-# 2. 重新插拔
-# 3. 重启 adb
-adb kill-server
-adb start-server
-adb devices
-```
-
-### Q: H5 页面在壳工程 WebView 中白屏
-
-```properties
-# 开发时在 AndroidManifest.xml 中：
-android:usesCleartextTraffic="true"
-
-# 或使用 HTTPS 的本地开发服务器
-```
-
-### Q: 手机调试时无法访问本地 H5 开发服务器
-
-```bash
-# 1. 查 PC 的局域网 IP
-ipconfig
-# 比如 192.168.1.100
-
-# 2. 修改 vite.config.ts，允许外部访问
-#    server.host: '0.0.0.0' 已配置
-
-# 3. 手机浏览器访问 http://192.168.1.100:5173
-#    确认手机和 PC 在同一 Wi-Fi 下
-```
-
----
-
-## 项目结构速查
-
-```
-arphoto/
-├── lib/                          # 壳工程 + 原生 Module
-│   ├── main.dart                 # 入口
-│   ├── shell/                    # 壳工程核心
-│   │   ├── app.dart              # Module 注册、启动
-│   │   ├── bridge/               # JS Bridge 通信
-│   │   ├── webview/              # WebView 容器
-│   │   └── router/               # 路由协调
-│   ├── modules/                  # 原生能力组件
-│   │   ├── camera/               # CameraModule
-│   │   ├── dct/                  # DCTModule
-│   │   ├── ar/                   # ARModule
-│   │   └── storage/              # StorageModule
-│   └── shared/                   # 共享类型 + 错误码
-├── h5_ui/                        # H5 UI 层（独立项目）
-│   ├── src/
-│   │   ├── pages/                # 6 个页面
-│   │   ├── bridge/               # Bridge 封装
-│   │   └── components/           # 通用组件
-│   └── package.json
-└── docs/                         # 设计文档
-```
-
-## 架构示意图
+### 架构（三层）
 
 ```
 ┌──────────────────────────────────────┐
-│    小程序 (复用 H5 UI 层)              │
-└──────────┬───────────────────────────┘
-           │ 同一套 H5 代码
-┌──────────▼───────────────────────────┐
-│  H5 UI 层 (React + Vite)             │ ← 热更新
+│  H5 UI 层 (React + Vite + TypeScript)│ ← 热更新，可移植到小程序
 ├──────────────────────────────────────┤
 │  壳工程 (Flutter)                     │ ← App Store 审核
 │  • WebView 容器                       │
@@ -327,6 +43,304 @@ arphoto/
 └──────────────────────────────────────┘
 ```
 
+### 技术栈
+
+| 层 | 选型 |
+|---|---|
+| 壳工程 | Flutter (Dart) |
+| UI 层 | React + Vite + TypeScript |
+| 原生模块 | CameraModule / DCTModule / ARModule / StorageModule |
+| 通信 | JS Bridge（flutter_inappwebview 预留） |
+| 数据库 | SQLite（sqflite/drift，MVP 阶段模拟） |
+| 水印算法 | 自研 DCT 频域水印 |
+
 ---
 
-> 有疑问？在项目根目录提 Issue，或找 `lihaonan01` 沟通。
+## 2. 当前进度
+
+### ✅ 已完成
+
+#### Phase 1: 壳工程核心
+- `lib/shell/app.dart` — 壳工程入口，注册所有 Module
+- `lib/shell/bridge/bridge_handler.dart` — JS Bridge 核心（请求/响应/事件/超时）
+- `lib/shell/webview/webview_container.dart` — WebView 容器 + 离线包管理器
+- `lib/shell/router/route_mapper.dart` — H5 路由 ↔ 原生页面映射
+- `lib/shared/types.dart` + `lib/shared/errors.dart` — 共享类型 + 错误码体系
+
+#### Phase 2: CameraModule
+- `lib/modules/camera/` — 相机接口 + 配置 + 帧处理器 + 矩形检测器
+- MVP 阶段为模拟实现，后续接入 camera 插件
+
+#### Phase 3: DCTModule
+- `lib/modules/dct/` — DCT 算法核心 + 编码器 + 解码器 + 64bit 水印载荷
+- 8×8 块 DCT 变换、中频系数差分嵌入、多数投票解码
+
+#### Phase 4: StorageModule
+- `lib/modules/storage/` — SQLite 数据库 + 文件管理器 + 多 Provider 抽象
+- MVP 阶段为模拟实现，后续接入 sqflite
+
+#### Phase 5: ARModule
+- `lib/modules/ar/` — AR 渲染器 + 视频叠加 + Emoji 悬浮绘制（CustomPainter + 动画）
+
+#### Phase 6: H5 UI 层 — 第一版
+- 6 个页面 + Bridge 封装 + 底部导航
+
+#### Phase 7: H5 UI 层 — 导航重构（2026-08-11）
+- 底部导航从 5 Tab 改为 **3 Tab**：首页 / 我的内容 / 个人中心
+- 拍摄/扫描 → 全屏功能页，从首页大按钮进入，不在底部导航
+- 设置 → 归入个人中心子页
+- 画廊 → 合并到"我的内容"Tab，加了搜索框
+- 首页重新设计：两个大按钮（拍摄/扫描）+ 最近内容横向滚动 + 可折叠教程
+- 新增个人中心 Tab：头像/统计卡片/菜单入口
+- 新建 `src/components/TabLayout.tsx` 作为 Tab 页容器
+- 路由改用 `useParams` 传参（`/preview/:contentId`）
+
+### 🔧 环境状态
+
+| 项目 | 状态 |
+|---|---|
+| Flutter SDK 3.44.9 | ✅ 已安装 |
+| H5 前端（npm run dev） | ✅ 可运行，http://localhost:5173 |
+| Android Studio / SDK | ❌ 未安装，需下载 |
+| Android 真机调试 | ❌ 待 Android Studio 装好后进行 |
+| iOS 编译 | ❌ Windows 不支持，需云构建或 Mac |
+
+---
+
+## 3. 环境搭建
+
+### 3.1 启动 H5 前端（现在就可用）
+
+```bash
+cd d:\arphoto\h5_ui
+npm install
+npm run dev
+# 浏览器打开 http://localhost:5173
+```
+
+### 3.2 运行 Flutter 到 Android 手机
+
+```bash
+# 1. 先装 Android Studio（https://developer.android.com/studio）
+# 2. 配置 Android SDK
+flutter config --android-sdk "C:\Users\<用户名>\AppData\Local\Android\Sdk"
+flutter doctor --android-licenses
+
+# 3. 手机开 USB 调试，连上电脑
+flutter devices    # 确认设备
+
+# 4. 启动
+cd d:\arphoto
+flutter pub get
+flutter run
+```
+
+### 3.3 iOS 支持
+
+Windows 不能编译 iOS，建议用 **Codemagic** 或 **GitHub Actions** 云构建。
+
+---
+
+## 4. 项目结构
+
+```
+arphoto/
+├── lib/                              # 壳工程 + 原生 Module
+│   ├── main.dart                     # 入口
+│   ├── shell/                        # 壳工程核心
+│   │   ├── app.dart                  # Module 注册、启动
+│   │   ├── bridge/                   # JS Bridge 通信
+│   │   │   ├── bridge_handler.dart   # Bridge 核心
+│   │   │   └── bridge_events.dart    # 事件类型常量
+│   │   ├── webview/                  # WebView 容器
+│   │   │   └── webview_container.dart
+│   │   └── router/                   # 路由协调
+│   │       └── route_mapper.dart
+│   ├── modules/                      # 原生能力组件
+│   │   ├── camera/                   # CameraModule（4 文件）
+│   │   ├── dct/                      # DCTModule（5 文件）
+│   │   ├── ar/                       # ARModule（4 文件）
+│   │   └── storage/                  # StorageModule（5 文件）
+│   └── shared/                       # 共享类型 + 错误码
+│       ├── types.dart
+│       └── errors.dart
+├── h5_ui/                            # H5 UI 层（独立项目）
+│   ├── src/
+│   │   ├── App.tsx                   # 路由定义
+│   │   ├── pages/
+│   │   │   ├── home/                 # 首页（Tab）
+│   │   │   ├── my-content/           # 我的内容（Tab）
+│   │   │   ├── profile/              # 个人中心（Tab）
+│   │   │   ├── camera/               # 拍摄（全屏）
+│   │   │   ├── scan/                 # 扫描（全屏）
+│   │   │   ├── preview/              # AR 预览（全屏）
+│   │   │   └── settings/             # 设置（子页）
+│   │   ├── bridge/
+│   │   │   ├── bridge.ts             # JS Bridge 封装
+│   │   │   └── types.ts              # 协议类型
+│   │   └── components/
+│   │       ├── BottomNav.tsx          # 底部导航（3 Tab）
+│   │       └── TabLayout.tsx          # Tab 页容器
+│   └── package.json
+├── docs/
+│   ├── dev-setup-guide.md            # ← 就是这个文件，交接文档
+│   └── superpowers/specs/
+│       └── 2026-07-17-ar-photo-app-design.md  # 详细设计文档
+└── README.md
+```
+
+---
+
+## 5. 页面路由设计
+
+### 导航结构
+
+```
+底部导航:  首页  |  我的内容  |  个人中心
+           /      /my-content   /profile
+```
+
+### 页面分类
+
+| 类型 | 路由 | 说明 | 底部导航 |
+|---|---|---|---|
+| **Tab 页** | `/` | 首页：拍摄/扫描大按钮 + 最近内容 + 教程 | ✅ |
+| | `/my-content` | 我的内容：列表 + 搜索 + 管理 | ✅ |
+| | `/profile` | 个人中心：头像/统计/菜单 | ✅ |
+| **全屏页** | `/camera` | 拍摄（无底部导航） | ❌ |
+| | `/scan` | 扫描（无底部导航） | ❌ |
+| | `/preview/:contentId` | AR 预览（无底部导航） | ❌ |
+| **子页** | `/profile/settings` | 设置 | ❌ |
+| | `/profile/about` | 关于 | ❌ |
+
+### 首页布局
+
+```
+┌────────────────────────────┐
+│  AR Photo                  │  ← Logo
+├────────────────────────────┤
+│  ┌──────────────────────┐  │
+│  │  📷 拍摄新内容        │  │  ← 大按钮，主操作
+│  └──────────────────────┘  │
+│  ┌──────────────────────┐  │
+│  │  🔍 扫描一张照片      │  │  ← 大按钮，主操作
+│  └──────────────────────┘  │
+├────────────────────────────┤
+│  最近内容                   │  ← 横向滚动列表
+│  [缩略图] [缩略图] [缩略图]  │
+├────────────────────────────┤
+│  快速教程（可折叠）          │
+│  1📷 2🖨️ 3🔍 4✨          │
+└────────────────────────────┘
+```
+
+---
+
+## 6. 开发工作流
+
+### 启动开发环境
+
+```bash
+# 终端 1: H5 前端（热更新）
+cd d:\arphoto\h5_ui
+npm run dev
+
+# 终端 2: Flutter 壳工程
+cd d:\arphoto
+flutter run
+```
+
+### 调试策略
+
+| 场景 | 工具 | 方式 |
+|---|---|---|
+| H5 UI 样式/交互 | Chrome DevTools | http://localhost:5173 |
+| Bridge 通信 | 浏览器 Console | 看 `[Bridge] Mock call:` 日志 |
+| 原生模块 | Flutter DevTools | `flutter run` 后连接 |
+| 真机相机/AR | Android 真机 | `flutter run` |
+
+### 代码提交
+
+```bash
+git add .
+git commit -m "feat: 做了什么"
+git push
+```
+
+---
+
+## 7. 待办清单
+
+### 优先级 P0（核心链路打通）
+
+- [ ] **安装 Android Studio** → 配好 Android SDK
+- [ ] **Android 真机跑通 `flutter run`**
+- [ ] **集成真实相机**：`camera_module.dart` 中的模拟实现替换为 `camera` 插件的 `CameraController`
+- [ ] **集成真实 WebView**：`webview_container.dart` 中的占位替换为 `flutter_inappwebview`
+
+### 优先级 P1（功能完善）
+
+- [ ] **集成真实数据库**：`database_helper.dart` 中的模拟实现替换为 sqflite 或 drift
+- [ ] **DCT 编解码真机验证**：用真实图片测试编解码链路
+- [ ] **Bridge 联调**：H5 ↔ 原生通信真机打通
+- [ ] **集成 video_player**：`video_overlay.dart` 的占位替换为真实播放器
+
+### 优先级 P2（体验打磨）
+
+- [ ] **iOS 云构建配置**：Codemagic 或 GitHub Actions
+- [ ] **离线包更新机制**：CDN 增量更新
+- [ ] **H5 页面加载状态**：骨架屏 + 加载动画
+- [ ] **错误处理优化**：各页面加载失败的重试/降级
+
+### 优先级 P3（未来迭代）
+
+- [ ] 微信小程序发布（复用 H5 UI 层）
+- [ ] 白名单共享权限
+- [ ] 云存储对接（WebDAV / S3 / NAS）
+- [ ] Emoji 弹幕编辑器（自定义位置、动画轨迹）
+- [ ] 艺术滤镜 / AI 特效
+
+---
+
+## 8. 常见问题
+
+### `flutter pub get` 慢
+
+```bash
+PUB_HOSTED_URL=https://pub.flutter-io.cn
+FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn
+```
+
+### `flutter doctor` 报 `Android licenses not accepted`
+
+```bash
+flutter doctor --android-licenses
+# 一直按 y 接受
+```
+
+### 手机连上但 `flutter devices` 看不到
+
+```bash
+adb kill-server
+adb start-server
+adb devices
+```
+
+### H5 页面在壳工程 WebView 中白屏
+
+```properties
+# android/app/src/main/AndroidManifest.xml 中：
+android:usesCleartextTraffic="true"
+```
+
+---
+
+## 附录：Git 提交记录
+
+```
+62efa9e  feat: 重构为壳工程+H5 UI+原生组件三层架构
+6807845  Move design doc to specs directory
+d42ced4  Initial commit: AR Photo app scaffold
+```
+
+> 下次续接工作：`cd d:\arphoto\h5_ui && npm run dev` 启动前端，看 `docs/dev-setup-guide.md` 的待办清单继续。

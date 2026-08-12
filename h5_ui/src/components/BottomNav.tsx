@@ -1,14 +1,12 @@
-/// 底部导航栏
+/// 底部导航栏 — 3 个 Tab
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const navItems = [
+const tabs = [
   { path: '/', icon: '🏠', label: '首页' },
-  { path: '/camera', icon: '📷', label: '拍摄' },
-  { path: '/scan', icon: '🔍', label: '扫描' },
-  { path: '/gallery', icon: '🖼️', label: '画廊' },
-  { path: '/settings', icon: '⚙️', label: '设置' },
+  { path: '/my-content', icon: '📦', label: '我的内容' },
+  { path: '/profile', icon: '👤', label: '个人中心' },
 ];
 
 const BottomNav: React.FC = () => {
@@ -17,18 +15,33 @@ const BottomNav: React.FC = () => {
 
   return (
     <nav className="bottom-nav safe-bottom">
-      {navItems.map((item) => (
+      {tabs.map((tab) => (
         <button
-          key={item.path}
-          className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
-          onClick={() => navigate(item.path)}
+          key={tab.path}
+          className={`nav-item ${location.pathname === tab.path ? 'active' : ''}`}
+          onClick={() => navigate(tab.path)}
         >
-          <span className="nav-icon">{item.icon}</span>
-          <span className="nav-label">{item.label}</span>
+          <span className="nav-icon">{tab.icon}</span>
+          <span className="nav-label">{tab.label}</span>
         </button>
       ))}
+
       <style>{`
+        .tab-layout {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+        }
+        .tab-content {
+          flex: 1;
+          overflow-y: auto;
+          padding-bottom: 64px;
+        }
         .bottom-nav {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
           display: flex;
           justify-content: space-around;
           align-items: center;
@@ -36,10 +49,6 @@ const BottomNav: React.FC = () => {
           background: rgba(20, 20, 30, 0.95);
           backdrop-filter: blur(10px);
           border-top: 1px solid rgba(255,255,255,0.08);
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
           z-index: 100;
         }
         .nav-item {
@@ -49,9 +58,9 @@ const BottomNav: React.FC = () => {
           gap: 2px;
           background: none;
           border: none;
-          color: rgba(255,255,255,0.5);
+          color: rgba(255,255,255,0.4);
           cursor: pointer;
-          padding: 4px 12px;
+          padding: 4px 20px;
           transition: color 0.2s;
         }
         .nav-item.active {

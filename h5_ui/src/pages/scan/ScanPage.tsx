@@ -40,7 +40,7 @@ const ScanPage: React.FC = () => {
         contentId: String(decoded.contentId),
         videoPath: `/content/${decoded.contentId}`,
       });
-      navigate('/preview', { state: { contentId: decoded.contentId } });
+      navigate(`/preview/${decoded.contentId}`);
     }
   };
 
@@ -58,7 +58,7 @@ const ScanPage: React.FC = () => {
   return (
     <div className="page">
       <div className="scan-header safe-top">
-        <button className="header-btn" onClick={() => navigate(-1)}>← 返回</button>
+        <button className="header-btn" onClick={() => navigate('/')}>← 首页</button>
         <span className="header-title">扫描</span>
         <div style={{ width: 60 }} />
       </div>
